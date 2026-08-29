@@ -23,17 +23,17 @@ export function RevealExperience() {
       {!revealed && (
         <button className="reveal-cover" onClick={reveal}>
           <span className="brand__mark">ML</span>
-          <small>YOUR COMMISSION · 001</small>
+          <small>MOCK ARTWORK · STUDY 001</small>
           <strong>เปิดชมผลงานของคุณ</strong>
           <i>แตะเพื่อเปิด</i>
         </button>
       )}
       <section className="reveal-stage">
         <div className="reveal-art">
-          <ArtworkComposition tone="mist" title="รุ่งอรุณยังคงคำมั่น" />
+          <ArtworkComposition tone="new-dawn" title="รุ่งอรุณยังคงคำมั่น" />
         </div>
         <div className="reveal-copy">
-          <p className="eyebrow">PRIVATE COMMISSION · 001</p>
+          <p className="eyebrow">MOCK ARTWORK · DEVELOPMENT STUDY 001</p>
           <h1>
             รุ่งอรุณ
             <br />
@@ -41,7 +41,7 @@ export function RevealExperience() {
           </h1>
           <p className="lead">
             ต้นไทรยืนอยู่ในแสงแรกเหนือแนวดอย รากของมันทอดลงสู่ผืนดิน
-            ขณะที่สายน้ำพาภาพไปสู่พื้นที่เปิด—การตีความส่วนบุคคลของการเริ่มต้นที่ไม่ทิ้งสิ่งสำคัญไว้ข้างหลัง
+            ขณะที่สายน้ำพาภาพไปสู่พื้นที่เปิด, การตีความส่วนบุคคลของการเริ่มต้นที่ไม่ทิ้งสิ่งสำคัญไว้ข้างหลัง
           </p>
           <div className="symbol-key">
             <span>
