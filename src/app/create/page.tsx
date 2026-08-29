@@ -1,0 +1,1 @@
+import type { Metadata } from "next"; import { CommissionWizard } from "@/components/commission-wizard"; export const metadata:Metadata={title:"เริ่มสร้างงาน",description:"กำหนดทิศทางงานศิลป์เฉพาะบุคคลทีละขั้น"}; export default function CreatePage(){return <main><CommissionWizard/></main>}

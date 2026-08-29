@@ -1,0 +1,1 @@
+import { ArtworkGrid } from "@/components/editorial";export default function AccountArtworks(){return <section className="account-content"><header><p>ผลงาน</p><h2>งานที่เก็บไว้<br/>สำหรับคุณ</h2></header><ArtworkGrid limit={1}/></section>}
