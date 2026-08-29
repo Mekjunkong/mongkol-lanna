@@ -45,6 +45,12 @@ export default function Home() {
         </aside>
       </section>
 
+      <section className="signal-strip" aria-label="สิ่งที่คุณจะได้รับจากขั้นตอนเริ่มต้น">
+        <div><span>01</span><strong>เริ่มจากเรื่องของคุณ</strong><p>ไม่ต้องรู้ศัพท์ศิลปะ แค่เลือกสิ่งที่อยากเก็บไว้</p></div>
+        <div><span>02</span><strong>เห็นทิศทางก่อนสร้าง</strong><p>ตรวจพิมพ์เขียวและปรับความรู้สึกได้ก่อนยืนยัน</p></div>
+        <div><span>03</span><strong>ตีความอย่างมีขอบเขต</strong><p>แยกข้อมูลอ้างอิง ความหมายส่วนบุคคล และงานศิลป์ให้ชัดเจน</p></div>
+      </section>
+
       <section className="process" id="process">
         <header>
           <p className="eyebrow">THE QUIET COMMISSION</p>

@@ -4,7 +4,7 @@ import { getDictionary } from "@/content/dictionaries";
 
 export function SiteHeader() {
   const d = getDictionary("th");
-  return <header className="site-header"><Link href="/" className="brand"><span className="brand__mark">ML</span><span><strong>{d.brand.name}</strong><small>{d.brand.latin}</small></span></Link><nav aria-label="เมนูหลัก"><Link href="/gallery">{d.nav.gallery}</Link><Link href="/about">{d.nav.about}</Link><Link href="/account">{d.nav.account}</Link><Link className="nav-cta" href="/create">{d.nav.create}</Link></nav><details className="mobile-nav"><summary aria-label="เปิดเมนู"><span/><span/></summary><div><Link href="/create">{d.nav.create}</Link><Link href="/gallery">{d.nav.gallery}</Link><Link href="/about">{d.nav.about}</Link><Link href="/cultural-approach">{d.nav.approach}</Link><Link href="/account">{d.nav.account}</Link></div></details></header>;
+  return <header className="site-header"><Link href="/" className="brand" aria-label={`${d.brand.name} กลับหน้าหลัก`}><span className="brand__mark">ML</span><span><strong>{d.brand.name}</strong><small>{d.brand.latin}</small></span></Link><nav aria-label="เมนูหลัก"><Link href="/gallery">{d.nav.gallery}</Link><Link href="/about">{d.nav.about}</Link><Link href="/account">{d.nav.account}</Link><Link className="nav-cta" href="/create">{d.nav.create}</Link></nav><details className="mobile-nav"><summary aria-label="เปิดเมนู"><span/><span/></summary><div><Link href="/create">{d.nav.create}</Link><Link href="/gallery">{d.nav.gallery}</Link><Link href="/about">{d.nav.about}</Link><Link href="/cultural-approach">{d.nav.approach}</Link><Link href="/account">{d.nav.account}</Link></div></details></header>;
 }
 
 export function SiteFooter() {
