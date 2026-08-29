@@ -1,1 +1,7 @@
-import Link from "next/link";import { ArtworkComposition } from "@/components/artwork-composition";import { SiteHeader } from "@/components/site-shell";export default function Preview(){return <><SiteHeader/><main className="preview"><header><p className="eyebrow">MOCK PREVIEW · DEVELOPMENT STUDY</p><h1>THE NEW DAWN<br/>พร้อมสำหรับการทบทวน</h1><p className="lead">นี่คือภาพจำลองภายในสำหรับดูสัดส่วน ลำดับสายตา และพื้นที่ว่างเท่านั้น ยังไม่มีการสร้างงานจริงหรือเรียกเก็บเงิน</p></header><div className="preview__stage"><ArtworkComposition tone="new-dawn" title="THE NEW DAWN · mock preview" safeZone/><div className="preview__legend"><span><i/>พื้นที่ภาพหลัก</span><span><i/>พื้นที่ว่างที่สงวนไว้</span></div></div><section className="mock-order"><div><p className="eyebrow">DEVELOPMENT APPROVAL</p><h2>คุณกำลังอนุมัติอะไร?</h2><p>การกดยืนยันเป็นเพียงการเปิดชมประสบการณ์ตัวอย่าง ไม่ใช่การชำระเงิน ไม่ใช่คำสั่งซื้อ และไม่เรียกผู้ให้บริการสร้างภาพภายนอก</p></div><Link className="button" href="/artwork/the-new-dawn">เปิดชมงานตัวอย่าง →</Link></section></main></>}
+import { DirectionPreview } from "@/components/direction-preview";
+import { SiteHeader } from "@/components/site-shell";
+
+export default async function Preview({ params }: { params: Promise<{ requestId: string }> }) {
+  const { requestId } = await params;
+  return <><SiteHeader /><DirectionPreview requestId={requestId} /></>;
+}

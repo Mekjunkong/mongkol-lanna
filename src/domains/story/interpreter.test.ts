@@ -27,6 +27,20 @@ describe("Story Interpreter",()=>{
    expect(serialized).not.toContain("2030");
    expect(serialized).not.toContain(raw);
  });
+ it("returns the complete deterministic V4 Art Direction shape",()=>{
+   const result=interpretStory({story:"We are beginning a calm new chapter.",chapter:"NEW_BEGINNING",collection:"MOUNTAIN_MIST",mood:"QUIET"});
+   expect(result).toMatchObject({chapter:"NEW_BEGINNING",centralIntention:"NEW_BEGINNING",collection:"MOUNTAIN_MIST",suggestedHero:"layered mountain ridge"});
+   expect(result.visualMetaphor).toBeTruthy();
+   expect(result.narrativeMovement).toBeTruthy();
+   expect(result.palette).toBeTruthy();
+   expect(result.composition).toBeTruthy();
+   expect(result.supportingElements.length).toBeGreaterThan(0);
+ });
+ it("allows an omitted story without inventing personal meaning",()=>{
+   const result=interpretStory({chapter:"HOME_FAMILY",collection:"NORTHERN_GARDEN",mood:"WARM"});
+   expect(result.needsConfirmation).toBe(false);
+   expect(result.lifeTheme).toBe("HOME");
+ });
  it("rejects more than five sentences and control characters",()=>{
    expect(storyInputSchema.safeParse({story:"One. Two. Three. Four. Five. Six.",intention:"GROWTH"}).success).toBe(false);
    expect(storyInputSchema.safeParse({story:"quiet\u0000story",intention:"GROWTH"}).success).toBe(false);

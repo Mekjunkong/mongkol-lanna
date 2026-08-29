@@ -1,48 +1,116 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { heroes, intentions, moods, worlds } from "@/content/mock-data";
+import { collections, lifeChapters, moods } from "@/content/mock-data";
+import { ART_DIRECTION_CHOICE_KEY, ART_DIRECTION_OUTPUT_KEY, parsePersistedChoices } from "@/domains/story/client-storage";
+import { interpretStory } from "@/domains/story/interpreter";
 import { ArtworkComposition, artworkStudySources } from "./artwork-composition";
 
-type Draft = { intention?: string; story?: string; world?: string; mood?: string; hero?: string; format?: string };
-const stages = ["ความตั้งใจ", "เรื่องราว", "โลกของภาพ", "อารมณ์", "ภาพหลัก", "รายละเอียด"];
-const initial: Draft = { format: "portrait" };
+type Draft = { chapter?: string; story?: string; collection?: string; mood?: string; name?: string; specialDate?: string; birthday?: string };
+const stages = ["Life Chapter", "Collection", "Mood", "Personal Details"] as const;
+const initial: Draft = {};
+const subscribeToChoices = (onStoreChange: () => void) => {
+  window.addEventListener("storage", onStoreChange);
+  return () => window.removeEventListener("storage", onStoreChange);
+};
+const getChoiceSnapshot = () => localStorage.getItem(ART_DIRECTION_CHOICE_KEY);
+const getServerChoiceSnapshot = () => null;
+
+function sentenceCount(value: string) {
+  return value.split(/[.!?。！？]+|\n+/u).map((part) => part.trim()).filter(Boolean).length;
+}
 
 export function CommissionWizard() {
-  const router = useRouter();
-  const [step, setStep] = useState(0);
-  const [draft, setDraft] = useState<Draft>(initial);
-  const [restored, setRestored] = useState(false);
-  useEffect(() => { try { const raw=localStorage.getItem("mongkol-commission-v1"); if(raw){const saved=JSON.parse(raw) as {step:number;draft:Draft}; setDraft(saved.draft); setStep(Math.min(saved.step, stages.length-1));} } finally {setRestored(true);} }, []);
-  useEffect(() => { if(restored) localStorage.setItem("mongkol-commission-v1", JSON.stringify({step,draft})); }, [draft,step,restored]);
-  const update=(key:keyof Draft,value:string)=>setDraft(v=>({...v,[key]:value}));
-  const valid = step===1 || Boolean([draft.intention,draft.story,draft.world,draft.mood,draft.hero,draft.format][step]);
-  const next=()=>{ if(step<stages.length-1)setStep(s=>s+1); else router.push("/blueprint/quiet-dawn-001"); };
-  const selectedTone = draft.world === "river-courtyard" ? "sacred-river" : draft.world === "forest-gold" ? "golden-forest" : "new-dawn";
-  return <div className="wizard-shell">
-    <aside className="wizard-visual"><ArtworkComposition tone={selectedTone}/><p>ภาพตัวอย่างนี้เป็น MOCK ARTWORK สำหรับช่วยกำหนดทิศทาง ไม่ใช่ผลงานที่สร้างเสร็จ</p></aside>
-    <section className="wizard-panel" aria-labelledby="wizard-title">
-      <header className="wizard-progress"><LinkHome/><div><p>ขั้นที่ {step+1} จาก {stages.length}</p><progress value={step+1} max={stages.length}>{step+1}/{stages.length}</progress></div><span aria-live="polite">{restored ? "บันทึกแล้ว" : "กำลังเรียกคืน…"}</span></header>
-      <div className="wizard-content">
-        <p className="eyebrow">{stages[step]} · {String(step+1).padStart(2,"0")}</p>
-        {step===0 && <ChoiceStep title="คุณกำลังอยู่ในบทไหนของชีวิต?" intro="เลือกหนึ่งสิ่งที่อยากให้งานชิ้นนี้เก็บไว้ ไม่มีคำตอบที่ถูกหรือผิด" name="intention" value={draft.intention} options={intentions.map((x,i)=>({id:x.id,label:x.th,detail:x.note,tone:(["new-dawn","quiet-mountain","sacred-river","guardian"] as const)[i]}))} onChange={v=>update("intention",v)}/>}
-        {step===1 && <div><h1 id="wizard-title">มีเรื่องราวที่อยากแบ่งปันไหม?</h1><p className="step-intro">ส่วนนี้ไม่บังคับ เขียนสั้น ๆ 1–5 ประโยค หรือข้ามไปได้ เรื่องของคุณใช้เพื่อกำหนดทิศทางภาพเท่านั้น</p><label className="story-field"><span>เรื่องราวของคุณ <small>ไม่บังคับ</small></span><textarea maxLength={600} rows={7} value={draft.story||""} onChange={e=>update("story",e.target.value)} placeholder="เช่น ช่วงเวลาที่กำลังเปลี่ยนผ่าน บ้านที่คิดถึง หรือสิ่งที่อยากจดจำ…"/><small>{draft.story?.length||0} / 600</small></label></div>}
-        {step===2 && <ChoiceStep title="โลกของภาพแบบใดใกล้กับคุณ?" intro="แต่ละโลกกำหนดภูมิทัศน์ แสง และจังหวะขององค์ประกอบ" name="world" value={draft.world} options={worlds.map(x=>({id:x.id,label:x.name,detail:x.en,tone:x.tone}))} onChange={v=>update("world",v)}/>}
-        {step===3 && <ChoiceStep title="อยากให้ภาพรู้สึกอย่างไร?" intro="เลือกน้ำเสียงหลักหนึ่งอย่าง เพื่อให้รายละเอียดทั้งหมดเดินไปในจังหวะเดียวกัน" name="mood" value={draft.mood} options={moods.map((x,i)=>({id:x,label:x,detail:"อารมณ์หลักขององค์ประกอบ",tone:(["quiet-mountain","golden-forest","new-dawn","guardian"] as const)[i]}))} onChange={v=>update("mood",v)}/>}
-        {step===4 && <ChoiceStep title="สิ่งใดควรเป็นหัวใจของภาพ?" intro="ภาพหลักจะเด่นที่สุด ส่วนองค์ประกอบอื่นมีหน้าที่สนับสนุน" name="hero" value={draft.hero} options={heroes.map((x,i)=>({id:x.id,label:x.name,detail:x.note,tone:(["golden-forest","quiet-mountain","sacred-river"] as const)[i]}))} onChange={v=>update("hero",v)}/>}
-        {step===5 && <ChoiceStep title="รูปแบบใดจะช่วยโอบอุ้มงานชิ้นนี้?" intro="เราจะสงวนพื้นที่ว่างและจัดลำดับภาพให้เหมาะกับสัดส่วนนี้" name="format" value={draft.format} options={[{id:"portrait",label:"แนวตั้ง",detail:"เหมาะกับหน้าจอและผนังแคบ",tone:"new-dawn" as const},{id:"landscape",label:"แนวนอน",detail:"เหมาะกับผนังกว้างและพื้นที่รับแขก",tone:"sacred-river" as const},{id:"square",label:"จัตุรัส",detail:"สมดุลและใช้งานได้หลากหลาย",tone:"guardian" as const}]} onChange={v=>update("format",v)}/>}
-      </div>
-      <footer className="wizard-actions"><button className="button button--quiet" onClick={()=>step?setStep(s=>s-1):router.push("/")}><span>←</span> ย้อนกลับ</button><button className="button" disabled={!valid} onClick={next}>{step===stages.length-1?"ดูพิมพ์เขียว":"ถัดไป"} <span>→</span></button></footer>
-    </section>
-  </div>;
+  const choiceSnapshot = useSyncExternalStore(subscribeToChoices, getChoiceSnapshot, getServerChoiceSnapshot);
+  const saved = useMemo(() => parsePersistedChoices(choiceSnapshot), [choiceSnapshot]);
+  return <CommissionWizardForm key={choiceSnapshot ?? "new-direction"} initialDraft={saved?.choices ?? initial} initialStep={saved?.step ?? 0} />;
 }
-function LinkHome() {
+
+function CommissionWizardForm({ initialDraft, initialStep }: { initialDraft: Draft; initialStep: number }) {
+  const router = useRouter();
+  const [step, setStep] = useState(initialStep);
+  const [draft, setDraft] = useState<Draft>(initialDraft);
+
+  useEffect(() => {
+    localStorage.removeItem("mongkol-art-direction-v4");
+    const choices = { chapter: draft.chapter, collection: draft.collection, mood: draft.mood };
+    localStorage.setItem(ART_DIRECTION_CHOICE_KEY, JSON.stringify({ step, choices }));
+  }, [draft.chapter, draft.collection, draft.mood, step]);
+
+  const update = (key: keyof Draft, value: string) => setDraft((current) => ({ ...current, [key]: value }));
+  const storySentences = sentenceCount(draft.story ?? "");
+  const valid = [Boolean(draft.chapter) && storySentences <= 5, Boolean(draft.collection), Boolean(draft.mood), true][step];
+  const selectedTone = useMemo(() => collections.find((item) => item.id === draft.collection)?.tone ?? "new-dawn", [draft.collection]);
+  const next = () => {
+    if (step < stages.length - 1) return setStep((current) => current + 1);
+    const direction = interpretStory({ chapter: draft.chapter, story: draft.story ?? "", collection: draft.collection, mood: draft.mood });
+    localStorage.setItem(ART_DIRECTION_OUTPUT_KEY, JSON.stringify(direction));
+    router.push("/blueprint/art-direction-demo");
+  };
+
   return (
-    <Link className="wizard-brand" href="/" aria-label="กลับหน้าหลัก">
-      ML
-    </Link>
+    <div className="wizard-shell">
+      <aside className="wizard-visual">
+        <ArtworkComposition tone={selectedTone} title="Demonstration artwork study for Art Direction" />
+        <p>DEMONSTRATION ARTWORK STUDY · Your choices shape an Art Direction only. No artwork is generated and no payment begins here.</p>
+      </aside>
+      <section className="wizard-panel" aria-labelledby="wizard-title">
+        <header className="wizard-progress">
+          <Link className="wizard-brand" href="/" aria-label="Back to home">ML</Link>
+          <div><p>Step {step + 1} of exactly 4 · {stages[step]}</p><progress value={step + 1} max={4}>{step + 1}/4</progress></div>
+          <span aria-live="polite">Choices saved locally</span>
+        </header>
+
+        <div className="wizard-content">
+          <p className="eyebrow">YOUR STORY BEFORE SYMBOLS · 0{step + 1}</p>
+          {step === 0 && (
+            <fieldset>
+              <legend id="wizard-title">Which life chapter are you in?</legend>
+              <p className="step-intro">Choose one chapter, then add an optional story in one to five sentences. You do not need art vocabulary.</p>
+              <div className="choice-list compact-choices">
+                {lifeChapters.map((item, index) => <Choice key={item.id} name="chapter" value={draft.chapter} id={item.id} label={item.label} detail={`${item.th} · ${item.note}`} tone={("new-dawn" as keyof typeof artworkStudySources)} index={index} onChange={(value) => update("chapter", value)} />)}
+              </div>
+              <label className="story-field">
+                <span>Your story <small>Optional, 1–5 sentences</small></span>
+                <textarea maxLength={800} rows={5} value={draft.story ?? ""} onChange={(event) => update("story", event.target.value)} placeholder="A moment, relationship, place, or change you want the artwork to hold…" />
+                <small className={storySentences > 5 ? "field-error" : ""}>{storySentences} / 5 sentences · {(draft.story ?? "").length} / 800 characters</small>
+              </label>
+            </fieldset>
+          )}
+          {step === 1 && <ChoiceStep title="Choose the world of your artwork" intro="Each collection sets the landscape, light, and visual rhythm. Collection names describe artistic worlds, not religious or historical claims." name="collection" value={draft.collection} options={collections} onChange={(value) => update("collection", value)} />}
+          {step === 2 && <ChoiceStep title="How should the artwork feel?" intro="One mood keeps the palette, space, and movement coherent." name="mood" value={draft.mood} options={moods.map((item) => ({ ...item, note: item.th }))} onChange={(value) => update("mood", value)} />}
+          {step === 3 && (
+            <div>
+              <h1 id="wizard-title">Add personal details, if you wish</h1>
+              <p className="step-intro">These details are optional presentation metadata. They never enter the artwork prompt and create no astrological or sacred meaning.</p>
+              <div className="personal-fields">
+                <label><span>Name <small>Optional</small></span><input value={draft.name ?? ""} maxLength={80} onChange={(event) => update("name", event.target.value)} autoComplete="name" /></label>
+                <label><span>Special date <small>Optional</small></span><input type="date" value={draft.specialDate ?? ""} onChange={(event) => update("specialDate", event.target.value)} /></label>
+                <label><span>Birthday <small>Optional</small></span><input type="date" value={draft.birthday ?? ""} onChange={(event) => update("birthday", event.target.value)} /></label>
+              </div>
+              <aside className="privacy-note"><strong>Kept private and temporary</strong><p>Your raw story, name, and dates remain only in this open page. They are not saved to browser storage, sent to an image provider, or converted into predictions.</p></aside>
+            </div>
+          )}
+        </div>
+
+        <footer className="wizard-actions">
+          <button className="button button--quiet" onClick={() => step ? setStep((current) => current - 1) : router.push("/")}><span>←</span> Back</button>
+          <button className="button" disabled={!valid} onClick={next}>{step === 3 ? "Create My Art Direction" : "Continue"} <span>→</span></button>
+        </footer>
+      </section>
+    </div>
   );
 }
-function ChoiceStep({title,intro,name,value,options,onChange}:{title:string;intro:string;name:string;value?:string;options:{id:string;label:string;detail:string;tone: keyof typeof artworkStudySources}[];onChange:(value:string)=>void}) { return <fieldset><legend id="wizard-title">{title}</legend><p className="step-intro">{intro}</p><div className="choice-list">{options.map((o,i)=><label className={`choice ${value===o.id?"choice--selected":""}`} onClick={()=>onChange(o.id)} key={o.id}><Image className="choice__thumb" src={artworkStudySources[o.tone]} alt="" width={58} height={58}/><input type="radio" name={name} value={o.id} checked={value===o.id} onChange={()=>onChange(o.id)}/><span className="choice__number">{String(i+1).padStart(2,"0")}</span><span className="choice__copy"><strong>{o.label}</strong><small>{o.detail}</small></span><span className="choice__check">✓</span></label>)}</div></fieldset> }
+
+type ChoiceOption = { id: string; label: string; note: string; th?: string; tone: keyof typeof artworkStudySources };
+
+function ChoiceStep({ title, intro, name, value, options, onChange }: { title: string; intro: string; name: string; value?: string; options: readonly ChoiceOption[]; onChange: (value: string) => void }) {
+  return <fieldset><legend id="wizard-title">{title}</legend><p className="step-intro">{intro}</p><div className="choice-list">{options.map((item, index) => <Choice key={item.id} name={name} value={value} id={item.id} label={item.label} detail={`${item.th ? `${item.th} · ` : ""}${item.note}`} tone={item.tone} index={index} onChange={onChange} />)}</div></fieldset>;
+}
+
+function Choice({ name, value, id, label, detail, tone, index, onChange }: { name: string; value?: string; id: string; label: string; detail: string; tone: keyof typeof artworkStudySources; index: number; onChange: (value: string) => void }) {
+  return <label className={`choice ${value === id ? "choice--selected" : ""}`} key={id}><Image className="choice__thumb" src={artworkStudySources[tone]} alt="" width={58} height={58} /><input type="radio" name={name} value={id} checked={value === id} onChange={() => onChange(id)} /><span className="choice__number">{String(index + 1).padStart(2, "0")}</span><span className="choice__copy"><strong>{label}</strong><small>{detail}</small></span><span className="choice__check">✓</span></label>;
+}

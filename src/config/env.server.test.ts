@@ -9,22 +9,16 @@ describe("server environment", () => {
     expect(environment.MOCK_CHECKOUT).toBe(true);
   });
 
-  it("refuses real generation without a server-side provider key", () => {
+  it("refuses real generation in the V4 P0 build", () => {
     expect(() =>
       parseServerEnvironment({
         NODE_ENV: "test",
         REAL_GENERATION: "true",
       }),
-    ).toThrow(/KIE_API_KEY/);
+    ).toThrow(/must remain false/);
   });
 
-  it("allows explicit real generation only with a provider key", () => {
-    const environment = parseServerEnvironment({
-      NODE_ENV: "test",
-      REAL_GENERATION: "true",
-      KIE_API_KEY: "server-only-test-key",
-    });
-
-    expect(environment.REAL_GENERATION).toBe(true);
+  it("still refuses real generation when a key is present", () => {
+    expect(() => parseServerEnvironment({ NODE_ENV: "test", REAL_GENERATION: "true", KIE_API_KEY: "server-only-test-key" })).toThrow(/must remain false/);
   });
 });

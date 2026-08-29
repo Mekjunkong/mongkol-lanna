@@ -2,11 +2,11 @@ export type Locale = "th" | "en";
 
 const th = {
   nav: {
-    create: "เริ่มสร้างงาน",
+    create: "Create My Art Direction",
     gallery: "ผลงาน",
     about: "เกี่ยวกับเรา",
     approach: "แนวทางวัฒนธรรม",
-    account: "ห้องสะสม",
+    account: "My Collection",
   },
   brand: {
     name: "มงคลล้านนา",
@@ -17,7 +17,7 @@ const th = {
     eyebrow: "งานศิลป์ที่เริ่มต้นจากเรื่องของคุณ",
     title: "เรื่องราวของคุณ\nความตั้งใจของคุณ\nถ่ายทอดเป็นศิลป์ไทย–ล้านนา",
     intro: "ร่วมกำหนดทิศทางงานศิลป์ร่วมสมัยที่มีเพียงชิ้นเดียว ผ่านเรื่องราว สัญลักษณ์ และบรรยากาศที่คัดสรรอย่างใส่ใจ",
-    cta: "เริ่มการว่าจ้าง",
+    cta: "Create My Art Direction",
     secondary: "ชมแนวทางการสร้างงาน",
     processTitle: "การว่าจ้างที่สงบและชัดเจน",
   },
@@ -40,11 +40,11 @@ export type Dictionary = {
 
 const en: Dictionary = {
   nav: {
-    create: "Begin a commission",
+    create: "Create My Art Direction",
     gallery: "Gallery",
     about: "About",
     approach: "Cultural approach",
-    account: "Library",
+    account: "My Collection",
   },
   brand: {
     name: "Mongkol Lanna",
@@ -55,7 +55,7 @@ const en: Dictionary = {
     eyebrow: "Art that begins with your story",
     title: "Your story.\nYour intention.\nPainted as Thai–Lanna art.",
     intro: "Shape an original contemporary artwork through a considered dialogue of story, symbol and atmosphere.",
-    cta: "Begin your commission",
+    cta: "Create My Art Direction",
     secondary: "See how it is made",
     processTitle: "A quiet, considered commission",
   },

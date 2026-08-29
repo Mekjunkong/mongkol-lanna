@@ -17,11 +17,11 @@ const serverEnvironmentSchema = z
     KIE_API_KEY: z.string().min(1).optional(),
   })
   .superRefine((environment, context) => {
-    if (environment.REAL_GENERATION && !environment.KIE_API_KEY) {
+    if (environment.REAL_GENERATION) {
       context.addIssue({
         code: "custom",
-        path: ["KIE_API_KEY"],
-        message: "KIE_API_KEY is required when REAL_GENERATION=true",
+        path: ["REAL_GENERATION"],
+        message: "REAL_GENERATION must remain false in the V4 P0 build",
       });
     }
   });

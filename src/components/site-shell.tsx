@@ -8,7 +8,7 @@ export function SiteHeader() {
 }
 
 export function SiteFooter() {
-  return <footer className="site-footer"><div><span className="eyebrow">MONGKOL LANNA</span><h2>ศิลปะที่ให้พื้นที่<br/>แก่เรื่องราวของคุณ</h2></div><div className="footer-links"><Link href="/gallery">ผลงาน</Link><Link href="/about">เกี่ยวกับเรา</Link><Link href="/cultural-approach">แนวทางวัฒนธรรม</Link><Link href="/faq">คำถามที่พบบ่อย</Link></div><p className="fine-print">ร่วมสมัย · ไทย–ล้านนา · สร้างขึ้นอย่างใส่ใจ<br/>© 2026 MONGKOL LANNA</p></footer>;
+  return <footer className="site-footer"><div><span className="eyebrow">MONGKOL LANNA · THE ATELIER</span><h2>ศิลปะที่ให้พื้นที่<br/>แก่เรื่องราวของคุณ</h2><p>Your story, composed as contemporary Lanna art.</p></div><div className="footer-links"><Link href="/about">The Atelier</Link><Link href="/#process">How It Works</Link><Link href="/gallery">Story Gallery</Link><Link href="/cultural-approach">Cultural Approach</Link><Link href="/faq">FAQ</Link><a href="https://wa.me/66929894495" rel="noreferrer">WhatsApp ↗</a></div><div className="footer-meta"><p className="footer-language" aria-label="Available languages">TH <span>/</span> EN</p><p className="fine-print">ร่วมสมัย · ไทย–ล้านนา · สร้างขึ้นอย่างใส่ใจ<br/>© 2026 MONGKOL LANNA<br/><Link href="/faq">Privacy &amp; terms</Link></p></div></footer>;
 }
 
 export function PageShell({ children }: { children: ReactNode }) { return <><SiteHeader/><main>{children}</main><SiteFooter/></>; }
